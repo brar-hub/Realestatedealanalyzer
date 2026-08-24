@@ -122,15 +122,27 @@ annual_cash_flow = (
 
 monthly_cash_flow = annual_cash_flow / 12
 
+# Cap Rate
+if purchase_price > 0:
+    cap_rate = (
+        net_operating_income / purchase_price
+    ) * 100
+else:
+    cap_rate = 0
+
 # -----------------------------
 # Basic Analysis
 # -----------------------------
 
 st.header("Basic Analysis")
 
-st.write(f"Annual Gross Rent: ${annual_rent:,.0f}")
+st.write(
+    f"Annual Gross Rent: ${annual_rent:,.0f}"
+)
 
-st.write(f"Vacancy Loss: ${vacancy_loss:,.0f}")
+st.write(
+    f"Vacancy Loss: ${vacancy_loss:,.0f}"
+)
 
 st.write(
     f"Effective Gross Income: ${effective_gross_income:,.0f}"
@@ -144,7 +156,13 @@ st.write(
     f"Net Operating Income: ${net_operating_income:,.0f}"
 )
 
-st.write(f"Loan Amount: ${loan_amount:,.0f}")
+st.write(
+    f"Cap Rate: {cap_rate:.2f}%"
+)
+
+st.write(
+    f"Loan Amount: ${loan_amount:,.0f}"
+)
 
 st.write(
     f"Monthly Mortgage Payment: ${monthly_mortgage_payment:,.0f}"
@@ -154,6 +172,10 @@ st.write(
     f"Annual Mortgage Payments: ${annual_mortgage_payments:,.0f}"
 )
 
-st.write(f"Annual Cash Flow: ${annual_cash_flow:,.0f}")
+st.write(
+    f"Annual Cash Flow: ${annual_cash_flow:,.0f}"
+)
 
-st.write(f"Monthly Cash Flow: ${monthly_cash_flow:,.0f}")
+st.write(
+    f"Monthly Cash Flow: ${monthly_cash_flow:,.0f}"
+)
