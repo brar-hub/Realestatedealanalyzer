@@ -1,11 +1,13 @@
+
 import streamlit as st
+import math
 import pandas as pd
 import numpy as np
 
 
 # ============================================================
 # WTM. — WEALTH THAT MATTERS
-# REAL ESTATE DEAL ANALYZER
+# Real Estate Deal Analyzer
 # ============================================================
 
 st.set_page_config(
@@ -24,77 +26,37 @@ st.markdown(
     """
     <style>
 
-    /* ========================================================
-       GLOBAL PAGE
-       ======================================================== */
-
-    .block-container {
-        width: 100%;
-        max-width: 1500px;
-        padding-top: 2rem;
-        padding-left: 3rem;
-        padding-right: 3rem;
-        padding-bottom: 4rem;
-    }
-
-
-    /* ========================================================
-       CENTERED HEADER
-       ======================================================== */
-
-    .wtm-header {
-        text-align: center;
-        width: 100%;
-        margin-bottom: 10px;
-    }
-
     .wtm-brand {
-        font-size: 52px;
+        font-size: 42px;
         font-weight: 800;
-        letter-spacing: -2px;
-        line-height: 1;
-        margin-bottom: 5px;
+        letter-spacing: -1px;
+        margin-bottom: -8px;
     }
 
     .wtm-tagline {
-        font-size: 19px;
+        font-size: 18px;
         font-weight: 500;
-        margin-bottom: 18px;
-    }
-
-    .app-title {
-        text-align: center;
-        font-size: 36px;
-        font-weight: 750;
-        line-height: 1.15;
-        margin-top: 5px;
-        margin-bottom: 12px;
+        margin-bottom: 20px;
     }
 
     .app-description {
-        text-align: center;
         font-size: 17px;
-        margin: 0 auto 30px auto;
-        max-width: 900px;
-        opacity: 0.85;
+        margin-bottom: 25px;
     }
-
-
-    /* ========================================================
-       SECTION TITLES
-       ======================================================== */
 
     .section-title {
         font-size: 24px;
         font-weight: 700;
-        margin-top: 25px;
-        margin-bottom: 12px;
+        margin-top: 20px;
+        margin-bottom: 10px;
     }
 
-
-    /* ========================================================
-       DEAL HEALTH
-       ======================================================== */
+    .analysis-card {
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(128,128,128,0.25);
+        margin-bottom: 15px;
+    }
 
     .health-good {
         font-size: 25px;
@@ -111,58 +73,27 @@ st.markdown(
         font-weight: 700;
     }
 
-
-    /* ========================================================
-       DISCLAIMER
-       ======================================================== */
-
-    .disclaimer {
-        font-size: 12px;
-        opacity: 0.7;
-        margin-top: 40px;
-        padding-top: 18px;
-        border-top: 1px solid rgba(128,128,128,0.25);
-        line-height: 1.6;
+    .metric-label {
+        font-size: 14px;
+        opacity: 0.75;
     }
 
-
-    /* ========================================================
-       PRINT WATERMARK
-       ======================================================== */
+    .metric-value {
+        font-size: 25px;
+        font-weight: 700;
+    }
 
     .watermark {
         display: none;
     }
 
-
-    /* ========================================================
-       RESPONSIVE SCREEN SIZING
-       ======================================================== */
-
-    @media (max-width: 900px) {
-
-        .block-container {
-            padding-left: 1.25rem;
-            padding-right: 1.25rem;
-        }
-
-        .wtm-brand {
-            font-size: 42px;
-        }
-
-        .app-title {
-            font-size: 30px;
-        }
-
-        .app-description {
-            font-size: 16px;
-        }
+    .disclaimer {
+        font-size: 12px;
+        opacity: 0.7;
+        margin-top: 30px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(128,128,128,0.25);
     }
-
-
-    /* ========================================================
-       PRINT
-       ======================================================== */
 
     @media print {
 
@@ -186,26 +117,22 @@ st.markdown(
             top: 45%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-25deg);
-            font-size: 110px;
+            font-size: 100px;
             font-weight: 800;
             opacity: 0.07;
             z-index: 9999;
             pointer-events: none;
-            white-space: nowrap;
         }
 
         button,
         [data-testid="stSidebar"],
         [data-testid="stHeader"],
-        [data-testid="stToolbar"],
-        [data-testid="stDecoration"],
-        .no-print {
+        [data-testid="stToolbar"] {
             display: none !important;
         }
 
-        .block-container {
-            max-width: none !important;
-            padding: 0 !important;
+        .no-print {
+            display: none !important;
         }
     }
 
@@ -226,63 +153,47 @@ st.markdown(
 
 
 # ============================================================
-# PRINT BUTTON
+# HEADER
 # ============================================================
 
-print_col1, print_col2 = st.columns([9, 1])
+header_left, header_right = st.columns([5, 1])
 
-with print_col2:
-
+with header_left:
     st.markdown(
-        '<div class="no-print">',
+        """
+        <div class="wtm-brand">WTM.</div>
+        <div class="wtm-tagline">Wealth That Matters</div>
+        """,
         unsafe_allow_html=True
     )
+
+with header_right:
+    st.markdown('<div class="no-print">', unsafe_allow_html=True)
 
     if st.button(
         "🖨️ Print",
         use_container_width=True,
-        help="Print the analysis or save it as a PDF."
+        help="Print the analysis or save it as a PDF using your browser's print dialog."
     ):
-        st.components.v1.html(
+        st.markdown(
             """
             <script>
-                window.parent.print();
+                window.print();
             </script>
             """,
-            height=0
+            unsafe_allow_html=True
         )
 
-    st.markdown(
-        '</div>',
-        unsafe_allow_html=True
-    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
-# ============================================================
-# CENTERED HEADER
-# ============================================================
+st.title("Real Estate Deal Analyzer")
 
 st.markdown(
     """
-    <div class="wtm-header">
-
-        <div class="wtm-brand">
-            WTM.
-        </div>
-
-        <div class="wtm-tagline">
-            Wealth That Matters
-        </div>
-
-        <div class="app-title">
-            Real Estate Deal Analyzer
-        </div>
-
-        <div class="app-description">
-            A free tool to analyze real estate investment opportunities
-            and understand how a property could build wealth over time.
-        </div>
-
+    <div class="app-description">
+    A free tool to analyze real estate investment opportunities and understand
+    how a property could build wealth over time.
     </div>
     """,
     unsafe_allow_html=True
@@ -301,7 +212,6 @@ st.markdown(
 col1, col2 = st.columns(2)
 
 with col1:
-
     purchase_price = st.number_input(
         "Purchase Price ($)",
         min_value=0.0,
@@ -339,9 +249,7 @@ with col1:
         """
     )
 
-
 with col2:
-
     interest_rate = st.number_input(
         "Mortgage Interest Rate (%)",
         min_value=0.0,
@@ -364,7 +272,7 @@ with col2:
         help="""
         The number of years used to calculate the mortgage payment.
         A longer amortization generally lowers the monthly payment but
-        increases total interest paid.
+        increases total interest paid over the life of the loan.
         """
     )
 
@@ -381,7 +289,6 @@ st.markdown(
 col1, col2 = st.columns(2)
 
 with col1:
-
     property_tax = st.number_input(
         "Annual Property Tax ($)",
         min_value=0.0,
@@ -390,6 +297,8 @@ with col1:
         format="%.0f",
         help="""
         The annual property tax charged by the municipality.
+        Property tax is an operating expense and reduces the income
+        generated by the property.
         """
     )
 
@@ -404,9 +313,7 @@ with col1:
         """
     )
 
-
 with col2:
-
     maintenance = st.number_input(
         "Annual Maintenance ($)",
         min_value=0.0,
@@ -415,7 +322,10 @@ with col2:
         format="%.0f",
         help="""
         Estimated annual repairs and maintenance.
+        This may include routine repairs, replacement items,
+        landscaping, appliance repairs, and similar costs.
         """
+
     )
 
     vacancy_rate = st.number_input(
@@ -430,17 +340,17 @@ with col2:
         that may be lost because the property is empty or between tenants.
 
         Example:
-        A 5% vacancy rate means approximately 5% of potential annual
-        rent is assumed to be uncollected.
+        A 5% vacancy rate means the analysis assumes approximately
+        5% of annual potential rent will not be collected.
 
-        Calculation:
+        Basic calculation:
         Vacancy Loss = Annual Gross Rent × Vacancy Rate
         """
     )
 
 
 # ============================================================
-# LONG-TERM WEALTH ASSUMPTIONS
+# OPTIONAL LONG-TERM ASSUMPTIONS
 # ============================================================
 
 st.markdown(
@@ -451,7 +361,6 @@ st.markdown(
 col1, col2, col3 = st.columns(3)
 
 with col1:
-
     appreciation_rate = st.number_input(
         "Annual Property Appreciation (%)",
         min_value=-20.0,
@@ -465,9 +374,7 @@ with col1:
         """
     )
 
-
 with col2:
-
     rent_growth_rate = st.number_input(
         "Annual Rent Growth (%)",
         min_value=-20.0,
@@ -477,13 +384,12 @@ with col2:
         format="%.1f",
         help="""
         Assumed annual growth in rental income.
-        Actual rent growth depends on market conditions and regulations.
+        This is a scenario assumption and actual rent growth depends
+        on market conditions and applicable regulations.
         """
     )
 
-
 with col3:
-
     depreciation_rate = st.number_input(
         "Illustrative Depreciation (%)",
         min_value=0.0,
@@ -493,9 +399,10 @@ with col3:
         format="%.1f",
         help="""
         An illustrative annual depreciation rate used only to visualize
-        how a depreciable basis could decline over time.
+        how a property's depreciable value could decline over time.
 
-        This is not a tax calculation.
+        Actual tax depreciation rules are jurisdiction-specific and may
+        differ substantially from this simplified illustration.
         """
     )
 
@@ -506,15 +413,11 @@ with col3:
 
 annual_gross_rent = monthly_rent * 12
 
-vacancy_loss = annual_gross_rent * vacancy_rate / 100
+vacancy_loss = annual_gross_rent * (vacancy_rate / 100)
 
 effective_gross_income = annual_gross_rent - vacancy_loss
 
-operating_expenses = (
-    property_tax
-    + insurance
-    + maintenance
-)
+operating_expenses = property_tax + insurance + maintenance
 
 noi = effective_gross_income - operating_expenses
 
@@ -524,32 +427,18 @@ cap_rate = (
     else 0
 )
 
-loan_amount = max(
-    purchase_price - down_payment,
-    0
-)
+loan_amount = max(purchase_price - down_payment, 0)
 
-monthly_rate = (
-    interest_rate / 100 / 12
-)
-
-number_of_payments = (
-    amortization_years * 12
-)
-
+monthly_rate = interest_rate / 100 / 12
+number_of_payments = amortization_years * 12
 
 if loan_amount <= 0:
-
     monthly_mortgage_payment = 0
 
 elif monthly_rate == 0:
-
-    monthly_mortgage_payment = (
-        loan_amount / number_of_payments
-    )
+    monthly_mortgage_payment = loan_amount / number_of_payments
 
 else:
-
     monthly_mortgage_payment = (
         loan_amount
         * (
@@ -561,18 +450,11 @@ else:
         )
     )
 
+annual_mortgage_payments = monthly_mortgage_payment * 12
 
-annual_mortgage_payments = (
-    monthly_mortgage_payment * 12
-)
+annual_cash_flow = noi - annual_mortgage_payments
 
-annual_cash_flow = (
-    noi - annual_mortgage_payments
-)
-
-monthly_cash_flow = (
-    annual_cash_flow / 12
-)
+monthly_cash_flow = annual_cash_flow / 12
 
 cash_invested = down_payment
 
@@ -582,28 +464,15 @@ cash_on_cash_return = (
     else 0
 )
 
-
-# ============================================================
-# BREAK-EVEN RENT
-# ============================================================
-
-if vacancy_rate < 100:
-
-    annual_break_even_rent = (
-        operating_expenses
-        + annual_mortgage_payments
-    ) / (
-        1 - vacancy_rate / 100
-    )
-
-else:
-
-    annual_break_even_rent = 0
-
-
-break_even_monthly_rent = (
-    annual_break_even_rent / 12
+# Break-even rent
+annual_break_even_rent = (
+    (operating_expenses + annual_mortgage_payments)
+    / (1 - vacancy_rate / 100)
+    if vacancy_rate < 100
+    else 0
 )
+
+break_even_monthly_rent = annual_break_even_rent / 12
 
 
 # ============================================================
@@ -611,17 +480,14 @@ break_even_monthly_rent = (
 # ============================================================
 
 if monthly_cash_flow >= 300:
-
     health = "🟢 Strong"
     health_class = "health-good"
 
 elif monthly_cash_flow >= 0:
-
     health = "🟡 Marginal"
     health_class = "health-marginal"
 
 else:
-
     health = "🔴 Negative"
     health_class = "health-poor"
 
@@ -643,7 +509,7 @@ st.markdown(
 
 if monthly_cash_flow > 0:
 
-    st.markdown(
+    deal_summary = (
         f"""
         This property is estimated to generate approximately
         **${monthly_cash_flow:,.0f} per month in positive cash flow**
@@ -653,7 +519,7 @@ if monthly_cash_flow > 0:
 
 elif monthly_cash_flow < 0:
 
-    st.markdown(
+    deal_summary = (
         f"""
         This property is estimated to require approximately
         **${abs(monthly_cash_flow):,.0f} per month from the investor**
@@ -663,12 +529,15 @@ elif monthly_cash_flow < 0:
 
 else:
 
-    st.markdown(
+    deal_summary = (
         """
         This property is estimated to approximately break even each month
-        under the assumptions entered.
+        after the assumptions entered above.
         """
     )
+
+
+st.markdown(deal_summary)
 
 
 st.markdown(
@@ -683,17 +552,16 @@ st.markdown(
 )
 
 
-# ============================================================
-# PLAIN ENGLISH INTERPRETATION
-# ============================================================
+# Plain-English interpretation
 
 if monthly_cash_flow > 0 and cash_on_cash_return >= 5:
 
     interpretation = """
     **What this means:** The property is currently producing positive cash
-    flow and the cash invested is generating a reasonable annual return
-    under these assumptions. The purchase price, financing, property
-    condition and future expenses should still be considered.
+    flow and the amount of cash invested is generating a reasonable annual
+    return under these assumptions. The investment may have a solid starting
+    position, but the purchase price, financing, property condition and
+    future expenses still matter.
     """
 
 elif monthly_cash_flow > 0:
@@ -702,7 +570,8 @@ elif monthly_cash_flow > 0:
     **What this means:** The property is currently paying its estimated
     operating costs and mortgage and still leaves some cash flow for the
     investor. However, the return on the cash invested is relatively modest,
-    so long-term equity growth, rent growth or appreciation may be important.
+    so the investment may depend more heavily on long-term equity growth,
+    rent growth or appreciation.
     """
 
 else:
@@ -714,7 +583,6 @@ else:
     change through a lower purchase price, higher rent, lower expenses,
     different financing or another strategy.
     """
-
 
 st.info(interpretation)
 
@@ -763,22 +631,16 @@ d1, d2 = st.columns(2)
 
 with d1:
 
+    st.write(f"**Annual Gross Rent:** ${annual_gross_rent:,.0f}")
+
+    st.write(f"**Vacancy Loss:** ${vacancy_loss:,.0f}")
+
     st.write(
-        f"**Annual Gross Rent:** ${annual_gross_rent:,.0f}"
+        f"**Effective Gross Income:** ${effective_gross_income:,.0f}"
     )
 
     st.write(
-        f"**Vacancy Loss:** ${vacancy_loss:,.0f}"
-    )
-
-    st.write(
-        f"**Effective Gross Income:** "
-        f"${effective_gross_income:,.0f}"
-    )
-
-    st.write(
-        f"**Operating Expenses:** "
-        f"${operating_expenses:,.0f}"
+        f"**Operating Expenses:** ${operating_expenses:,.0f}"
     )
 
     st.write(
@@ -788,7 +650,6 @@ with d1:
     st.write(
         f"**Cap Rate:** {cap_rate:.2f}%"
     )
-
 
 with d2:
 
@@ -823,7 +684,7 @@ with d2:
 
 
 # ============================================================
-# BREAK-EVEN ANALYSIS
+# BREAK-EVEN RENT
 # ============================================================
 
 st.markdown(
@@ -833,8 +694,7 @@ st.markdown(
 
 st.write(
     f"""
-    The estimated break-even rent is
-    **${break_even_monthly_rent:,.0f}/month**.
+    The estimated break-even rent is **${break_even_monthly_rent:,.0f}/month**.
 
     This means the property would need approximately this level of monthly
     rent, under the assumptions entered, for rental income to cover estimated
@@ -842,13 +702,9 @@ st.write(
     """
 )
 
-
 rent_range = np.linspace(
     max(0, monthly_rent * 0.5),
-    max(
-        monthly_rent * 1.5,
-        break_even_monthly_rent * 1.25
-    ),
+    max(monthly_rent * 1.5, break_even_monthly_rent * 1.25),
     100
 )
 
@@ -857,14 +713,8 @@ cash_flow_range = []
 for rent in rent_range:
 
     gross = rent * 12
-
-    vacancy = (
-        gross * vacancy_rate / 100
-    )
-
-    effective_income = (
-        gross - vacancy
-    )
+    vacancy = gross * vacancy_rate / 100
+    effective_income = gross - vacancy
 
     cash_flow = (
         effective_income
@@ -872,10 +722,7 @@ for rent in rent_range:
         - annual_mortgage_payments
     )
 
-    cash_flow_range.append(
-        cash_flow / 12
-    )
-
+    cash_flow_range.append(cash_flow / 12)
 
 break_even_df = pd.DataFrame(
     {
@@ -884,11 +731,9 @@ break_even_df = pd.DataFrame(
     }
 )
 
-
 st.line_chart(
     break_even_df.set_index("Monthly Rent"),
-    y="Monthly Cash Flow",
-    use_container_width=True
+    y="Monthly Cash Flow"
 )
 
 st.caption(
@@ -928,44 +773,36 @@ st.write(
 # AMORTIZATION / PROPERTY VALUE MODEL
 # ============================================================
 
-years = list(
-    range(0, amortization_years + 1)
-)
+years = list(range(0, amortization_years + 1))
 
 balance = loan_amount
+property_value = purchase_price
 
 rows = []
 
 cumulative_cash_flow = 0
-
 
 for year in years:
 
     if year == 0:
 
         current_balance = loan_amount
-
-        current_property_value = (
-            purchase_price
-        )
-
+        current_property_value = purchase_price
         cumulative_cash_flow = 0
 
     else:
 
+        # Calculate mortgage balance after one additional year
         for month in range(12):
 
             if balance <= 0:
                 balance = 0
                 break
 
-            interest_payment = (
-                balance * monthly_rate
-            )
+            interest_payment = balance * monthly_rate
 
             principal_payment = (
-                monthly_mortgage_payment
-                - interest_payment
+                monthly_mortgage_payment - interest_payment
             )
 
             principal_payment = max(
@@ -975,10 +812,7 @@ for year in years:
 
             balance -= principal_payment
 
-            balance = max(
-                balance,
-                0
-            )
+            balance = max(balance, 0)
 
         current_balance = balance
 
@@ -987,14 +821,9 @@ for year in years:
             * (1 + appreciation_rate / 100) ** year
         )
 
-        cumulative_cash_flow += (
-            annual_cash_flow
-        )
+        cumulative_cash_flow += annual_cash_flow
 
-    equity = (
-        current_property_value
-        - current_balance
-    )
+    equity = current_property_value - current_balance
 
     rows.append(
         {
@@ -1014,9 +843,7 @@ wealth_df = pd.DataFrame(rows)
 # WEALTH CHART
 # ============================================================
 
-st.markdown(
-    "### Property Value vs. Mortgage Balance"
-)
+st.markdown("### Property Value vs. Mortgage Balance")
 
 chart_df = wealth_df.set_index("Year")[
     [
@@ -1026,11 +853,8 @@ chart_df = wealth_df.set_index("Year")[
     ]
 ]
 
+st.line_chart(chart_df)
 
-st.line_chart(
-    chart_df,
-    use_container_width=True
-)
 
 st.caption(
     "The chart illustrates the relationship between estimated property value, "
@@ -1044,39 +868,25 @@ st.caption(
 
 final_row = wealth_df.iloc[-1]
 
-final_property_value = (
-    final_row["Property Value"]
-)
-
-final_mortgage_balance = (
-    final_row["Mortgage Balance"]
-)
-
-final_equity = (
-    final_row["Property Equity"]
-)
-
+final_property_value = final_row["Property Value"]
+final_mortgage_balance = final_row["Mortgage Balance"]
+final_equity = final_row["Property Equity"]
 
 e1, e2, e3 = st.columns(3)
 
 with e1:
-
     st.metric(
         f"Estimated Property Value — Year {amortization_years}",
         f"${final_property_value:,.0f}"
     )
 
-
 with e2:
-
     st.metric(
         f"Estimated Mortgage Balance — Year {amortization_years}",
         f"${final_mortgage_balance:,.0f}"
     )
 
-
 with e3:
-
     st.metric(
         f"Estimated Equity — Year {amortization_years}",
         f"${final_equity:,.0f}"
@@ -1084,7 +894,7 @@ with e3:
 
 
 # ============================================================
-# ILLUSTRATIVE DEPRECIATION
+# DEPRECIATION ILLUSTRATION
 # ============================================================
 
 st.markdown(
@@ -1099,7 +909,6 @@ st.warning(
     Tax depreciation is not the same thing as a property's market value
     declining. Actual tax treatment depends on the property, jurisdiction,
     ownership structure, tax rules and eligible depreciable assets.
-
     Consult a qualified tax professional before using depreciation for
     tax planning.
     """
@@ -1110,11 +919,7 @@ depreciation_rows = []
 
 depreciable_basis = purchase_price
 
-
-for year in range(
-    0,
-    amortization_years + 1
-):
+for year in range(0, amortization_years + 1):
 
     remaining_value = (
         depreciable_basis
@@ -1136,8 +941,7 @@ depreciation_df = pd.DataFrame(
 
 
 st.line_chart(
-    depreciation_df,
-    use_container_width=True
+    depreciation_df
 )
 
 st.caption(
@@ -1147,7 +951,7 @@ st.caption(
 
 
 # ============================================================
-# RENT GROWTH
+# RENT GROWTH SCENARIO
 # ============================================================
 
 st.markdown(
@@ -1155,14 +959,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 rent_rows = []
 
-
-for year in range(
-    0,
-    amortization_years + 1
-):
+for year in range(0, amortization_years + 1):
 
     projected_monthly_rent = (
         monthly_rent
@@ -1178,14 +977,10 @@ for year in range(
     )
 
 
-rent_df = pd.DataFrame(
-    rent_rows
-).set_index("Year")
-
+rent_df = pd.DataFrame(rent_rows).set_index("Year")
 
 st.line_chart(
-    rent_df,
-    use_container_width=True
+    rent_df
 )
 
 st.caption(
@@ -1201,7 +996,6 @@ st.markdown(
     '<div class="section-title">Investor Takeaway</div>',
     unsafe_allow_html=True
 )
-
 
 if monthly_cash_flow > 0:
 
@@ -1230,14 +1024,12 @@ st.markdown(
     The **{cash_on_cash_return:.2f}% cash-on-cash return** looks at the
     annual cash flow relative to the cash invested.
 
-    The estimated break-even rent is
-    **${break_even_monthly_rent:,.0f} per month**, which gives the investor
-    a useful target when comparing the property's current rent with its
-    required income.
+    The estimated break-even rent is **${break_even_monthly_rent:,.0f} per
+    month**, which gives the investor a useful target when comparing the
+    property's current rent with its required income.
 
     Over the long term, the property may also build wealth through mortgage
     principal reduction, property appreciation and potential rental growth.
-
     However, these outcomes are uncertain and depend on actual market
     conditions.
     """
@@ -1245,12 +1037,10 @@ st.markdown(
 
 
 # ============================================================
-# SIMPLE DEFINITIONS
+# EDUCATIONAL DEFINITIONS
 # ============================================================
 
-with st.expander(
-    "📘 Simple Definitions — Key Terms"
-):
+with st.expander("📘 Simple Definitions — Key Terms"):
 
     st.markdown(
         """
@@ -1258,8 +1048,7 @@ with st.expander(
 
         A quick way to compare a property's operating income with its price.
 
-        Formula:
-        Net Operating Income ÷ Property Value/Purchase Price.
+        **Formula:** Net Operating Income ÷ Property Value/Purchase Price.
 
         Higher does not automatically mean better. A higher cap rate may
         come with higher risk, weaker locations, older properties or other
@@ -1271,9 +1060,8 @@ with st.expander(
         Measures the annual cash flow generated compared with the cash
         you personally invested.
 
-        Example:
-        If you invested $100,000 and received $5,000 in annual cash flow,
-        the cash-on-cash return would be 5%.
+        Example: If you invested $100,000 and received $5,000 in annual
+        cash flow, the cash-on-cash return would be 5%.
 
 
         **Net Operating Income (NOI)**
@@ -1287,9 +1075,8 @@ with st.expander(
         An estimate of the percentage of potential rental income that may
         be lost because the property is empty or between tenants.
 
-        Example:
-        A 5% vacancy rate means the model assumes approximately 5% of
-        potential annual rent will not be collected.
+        Example: A 5% vacancy rate means the model assumes approximately
+        5% of potential annual rent will not be collected.
 
 
         **Cash Flow**
