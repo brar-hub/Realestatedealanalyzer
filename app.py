@@ -1,813 +1,1148 @@
 import streamlit as st
+import math
 import pandas as pd
+import numpy as np
+
 
 # ============================================================
-# WTM. — Wealth That Matters
+# WTM. — WEALTH THAT MATTERS
 # Real Estate Deal Analyzer
 # ============================================================
 
 st.set_page_config(
     page_title="WTM. Real Estate Deal Analyzer",
     page_icon="🏠",
-    layout="centered"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
+
 # ============================================================
-# WTM BRANDING
+# CUSTOM CSS
 # ============================================================
 
 st.markdown(
     """
-    <div style="text-align:center; padding:10px 0 20px 0;">
-        <div style="font-size:44px; font-weight:800;">
-            WTM.
-        </div>
-        <div style="font-size:16px;">
-            Wealth That Matters
-        </div>
+    <style>
+
+    .wtm-brand {
+        font-size: 42px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: -8px;
+    }
+
+    .wtm-tagline {
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 20px;
+    }
+
+    .app-description {
+        font-size: 17px;
+        margin-bottom: 25px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    .analysis-card {
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(128,128,128,0.25);
+        margin-bottom: 15px;
+    }
+
+    .health-good {
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .health-marginal {
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .health-poor {
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .metric-label {
+        font-size: 14px;
+        opacity: 0.75;
+    }
+
+    .metric-value {
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .watermark {
+        display: none;
+    }
+
+    .disclaimer {
+        font-size: 12px;
+        opacity: 0.7;
+        margin-top: 30px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(128,128,128,0.25);
+    }
+
+    @media print {
+
+        @page {
+            size: auto;
+            margin: 0.55in;
+        }
+
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .stApp {
+            position: relative;
+        }
+
+        .watermark {
+            display: block !important;
+            position: fixed;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            font-size: 100px;
+            font-weight: 800;
+            opacity: 0.07;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        button,
+        [data-testid="stSidebar"],
+        [data-testid="stHeader"],
+        [data-testid="stToolbar"] {
+            display: none !important;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# PRINT WATERMARK
+# ============================================================
+
+st.markdown(
+    '<div class="watermark">WTM.</div>',
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# HEADER
+# ============================================================
+
+header_left, header_right = st.columns([5, 1])
+
+with header_left:
+    st.markdown(
+        """
+        <div class="wtm-brand">WTM.</div>
+        <div class="wtm-tagline">Wealth That Matters</div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with header_right:
+    st.markdown('<div class="no-print">', unsafe_allow_html=True)
+
+    if st.button(
+        "🖨️ Print",
+        use_container_width=True,
+        help="Print the analysis or save it as a PDF using your browser's print dialog."
+    ):
+        st.markdown(
+            """
+            <script>
+                window.print();
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+st.title("Real Estate Deal Analyzer")
+
+st.markdown(
+    """
+    <div class="app-description">
+    A free tool to analyze real estate investment opportunities and understand
+    how a property could build wealth over time.
     </div>
     """,
     unsafe_allow_html=True
 )
 
-st.title("Real Estate Deal Analyzer")
-
-st.write(
-    "A free tool to analyze real estate investment opportunities "
-    "and understand how a property could build wealth over time."
-)
 
 # ============================================================
 # PROPERTY INFORMATION
 # ============================================================
 
-st.header("Property Information")
-
-purchase_price = st.number_input(
-    "Purchase Price ($)",
-    min_value=0.0,
-    value=500000.0,
-    step=5000.0,
-    help=(
-        "The agreed purchase price of the property. "
-        "This is used to calculate the property's operating return "
-        "and financing requirements."
-    )
+st.markdown(
+    '<div class="section-title">Property Information</div>',
+    unsafe_allow_html=True
 )
 
-monthly_rent = st.number_input(
-    "Monthly Rent ($)",
-    min_value=0.0,
-    value=3000.0,
-    step=100.0,
-    help=(
-        "The total rent expected each month. "
-        "For a multi-unit property, enter the combined rental income."
-    )
-)
+col1, col2 = st.columns(2)
 
-down_payment = st.number_input(
-    "Down Payment ($)",
-    min_value=0.0,
-    value=100000.0,
-    step=5000.0,
-    help=(
-        "The amount of your own money invested toward the purchase. "
-        "A larger down payment reduces the mortgage but requires "
-        "more cash upfront."
+with col1:
+    purchase_price = st.number_input(
+        "Purchase Price ($)",
+        min_value=0.0,
+        value=500000.0,
+        step=5000.0,
+        format="%.0f",
+        help="""
+        The price you expect to pay for the property before financing,
+        closing costs, renovations, or other acquisition costs.
+        """
     )
-)
 
-interest_rate = st.number_input(
-    "Mortgage Interest Rate (%)",
-    min_value=0.0,
-    value=5.14,
-    step=0.05,
-    help=(
-        "The annual mortgage interest rate used to estimate "
-        "the monthly mortgage payment."
+    monthly_rent = st.number_input(
+        "Monthly Rent ($)",
+        min_value=0.0,
+        value=3000.0,
+        step=100.0,
+        format="%.0f",
+        help="""
+        The total rent you expect to collect each month if the property
+        is fully occupied.
+        """
     )
-)
 
-amortization_years = st.number_input(
-    "Amortization (Years)",
-    min_value=1,
-    max_value=50,
-    value=25,
-    step=1,
-    help=(
-        "The period over which the mortgage is scheduled to be repaid. "
-        "A longer amortization generally lowers monthly payments "
-        "but increases total interest paid."
+    down_payment = st.number_input(
+        "Down Payment ($)",
+        min_value=0.0,
+        value=100000.0,
+        step=5000.0,
+        format="%.0f",
+        help="""
+        The amount of your own money invested into the property at purchase.
+        A larger down payment generally reduces the mortgage but increases
+        the amount of capital tied up in the property.
+        """
     )
-)
+
+with col2:
+    interest_rate = st.number_input(
+        "Mortgage Interest Rate (%)",
+        min_value=0.0,
+        max_value=30.0,
+        value=5.14,
+        step=0.05,
+        format="%.2f",
+        help="""
+        The annual interest rate charged on the mortgage.
+        This affects your monthly mortgage payment and investment cash flow.
+        """
+    )
+
+    amortization_years = st.number_input(
+        "Amortization (Years)",
+        min_value=1,
+        max_value=50,
+        value=25,
+        step=1,
+        help="""
+        The number of years used to calculate the mortgage payment.
+        A longer amortization generally lowers the monthly payment but
+        increases total interest paid over the life of the loan.
+        """
+    )
+
 
 # ============================================================
 # OPERATING EXPENSES
 # ============================================================
 
-st.header("Operating Expenses")
-
-annual_property_tax = st.number_input(
-    "Annual Property Tax ($)",
-    min_value=0.0,
-    value=4000.0,
-    step=250.0,
-    help=(
-        "Estimated property taxes paid to the local government each year."
-    )
+st.markdown(
+    '<div class="section-title">Operating Expenses</div>',
+    unsafe_allow_html=True
 )
 
-annual_insurance = st.number_input(
-    "Annual Insurance ($)",
-    min_value=0.0,
-    value=1500.0,
-    step=100.0,
-    help=(
-        "Estimated annual cost of insuring the property."
-    )
-)
+col1, col2 = st.columns(2)
 
-annual_maintenance = st.number_input(
-    "Annual Maintenance ($)",
-    min_value=0.0,
-    value=3000.0,
-    step=250.0,
-    help=(
-        "Estimated annual maintenance and repair costs. "
-        "This may include routine repairs, replacements and upkeep."
+with col1:
+    property_tax = st.number_input(
+        "Annual Property Tax ($)",
+        min_value=0.0,
+        value=4000.0,
+        step=250.0,
+        format="%.0f",
+        help="""
+        The annual property tax charged by the municipality.
+        Property tax is an operating expense and reduces the income
+        generated by the property.
+        """
     )
-)
 
-vacancy_rate = st.number_input(
-    "Vacancy Rate (%)",
-    min_value=0.0,
-    max_value=100.0,
-    value=5.0,
-    step=0.5,
-    help=(
-        "The estimated percentage of potential rental income lost "
-        "because the property is vacant or rent is not collected. "
-        "For example, 5% assumes approximately 95% of potential "
-        "rent is collected."
+    insurance = st.number_input(
+        "Annual Insurance ($)",
+        min_value=0.0,
+        value=1500.0,
+        step=100.0,
+        format="%.0f",
+        help="""
+        Estimated annual property insurance cost.
+        """
     )
-)
+
+with col2:
+    maintenance = st.number_input(
+        "Annual Maintenance ($)",
+        min_value=0.0,
+        value=3000.0,
+        step=250.0,
+        format="%.0f",
+        help="""
+        Estimated annual repairs and maintenance.
+        This may include routine repairs, replacement items,
+        landscaping, appliance repairs, and similar costs.
+        """
+
+    )
+
+    vacancy_rate = st.number_input(
+        "Vacancy Rate (%)",
+        min_value=0.0,
+        max_value=100.0,
+        value=5.0,
+        step=0.5,
+        format="%.1f",
+        help="""
+        Vacancy rate estimates the percentage of potential rental income
+        that may be lost because the property is empty or between tenants.
+
+        Example:
+        A 5% vacancy rate means the analysis assumes approximately
+        5% of annual potential rent will not be collected.
+
+        Basic calculation:
+        Vacancy Loss = Annual Gross Rent × Vacancy Rate
+        """
+    )
+
 
 # ============================================================
-# LONG-TERM ASSUMPTIONS
+# OPTIONAL LONG-TERM ASSUMPTIONS
 # ============================================================
 
-st.header("Long-Term Growth Assumptions")
-
-st.write(
-    "These assumptions are used only to illustrate how the investment "
-    "could evolve over time. They are not predictions."
+st.markdown(
+    '<div class="section-title">Long-Term Wealth Assumptions</div>',
+    unsafe_allow_html=True
 )
 
-projection_years = st.slider(
-    "Projection Period (Years)",
-    min_value=1,
-    max_value=30,
-    value=10,
-    help=(
-        "How many years you want the wealth projection to cover."
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    appreciation_rate = st.number_input(
+        "Annual Property Appreciation (%)",
+        min_value=-20.0,
+        max_value=30.0,
+        value=3.0,
+        step=0.5,
+        format="%.1f",
+        help="""
+        Assumed annual increase or decrease in the property's market value.
+        This is a scenario assumption, not a prediction.
+        """
     )
-)
 
-appreciation_rate = st.number_input(
-    "Annual Property Appreciation (%)",
-    min_value=-20.0,
-    max_value=20.0,
-    value=3.0,
-    step=0.5,
-    help=(
-        "The assumed annual change in the property's market value. "
-        "This is appreciation, not tax depreciation or CCA."
+with col2:
+    rent_growth_rate = st.number_input(
+        "Annual Rent Growth (%)",
+        min_value=-20.0,
+        max_value=30.0,
+        value=2.5,
+        step=0.5,
+        format="%.1f",
+        help="""
+        Assumed annual growth in rental income.
+        This is a scenario assumption and actual rent growth depends
+        on market conditions and applicable regulations.
+        """
     )
-)
 
-rent_growth_rate = st.number_input(
-    "Annual Rent Growth (%)",
-    min_value=-20.0,
-    max_value=20.0,
-    value=2.0,
-    step=0.5,
-    help=(
-        "The assumed annual growth in rental income."
-    )
-)
+with col3:
+    depreciation_rate = st.number_input(
+        "Illustrative Depreciation (%)",
+        min_value=0.0,
+        max_value=20.0,
+        value=4.0,
+        step=0.5,
+        format="%.1f",
+        help="""
+        An illustrative annual depreciation rate used only to visualize
+        how a property's depreciable value could decline over time.
 
-expense_growth_rate = st.number_input(
-    "Annual Expense Growth (%)",
-    min_value=-20.0,
-    max_value=20.0,
-    value=2.0,
-    step=0.5,
-    help=(
-        "The assumed annual growth in operating expenses."
+        Actual tax depreciation rules are jurisdiction-specific and may
+        differ substantially from this simplified illustration.
+        """
     )
-)
+
 
 # ============================================================
-# CORE CALCULATIONS
+# CALCULATIONS
 # ============================================================
 
-annual_rent = monthly_rent * 12
+annual_gross_rent = monthly_rent * 12
+
+vacancy_loss = annual_gross_rent * (vacancy_rate / 100)
+
+effective_gross_income = annual_gross_rent - vacancy_loss
+
+operating_expenses = property_tax + insurance + maintenance
+
+noi = effective_gross_income - operating_expenses
+
+cap_rate = (
+    noi / purchase_price * 100
+    if purchase_price > 0
+    else 0
+)
 
 loan_amount = max(purchase_price - down_payment, 0)
 
 monthly_rate = interest_rate / 100 / 12
-
 number_of_payments = amortization_years * 12
 
-if loan_amount > 0 and number_of_payments > 0:
+if loan_amount <= 0:
+    monthly_mortgage_payment = 0
 
-    if monthly_rate > 0:
-        monthly_mortgage_payment = loan_amount * (
-            monthly_rate * (1 + monthly_rate) ** number_of_payments
-        ) / (
-            (1 + monthly_rate) ** number_of_payments - 1
-        )
-    else:
-        monthly_mortgage_payment = loan_amount / number_of_payments
+elif monthly_rate == 0:
+    monthly_mortgage_payment = loan_amount / number_of_payments
 
 else:
-    monthly_mortgage_payment = 0
+    monthly_mortgage_payment = (
+        loan_amount
+        * (
+            monthly_rate
+            * (1 + monthly_rate) ** number_of_payments
+        )
+        / (
+            (1 + monthly_rate) ** number_of_payments - 1
+        )
+    )
 
 annual_mortgage_payments = monthly_mortgage_payment * 12
 
-vacancy_loss = annual_rent * (vacancy_rate / 100)
-
-effective_gross_income = annual_rent - vacancy_loss
-
-total_operating_expenses = (
-    annual_property_tax
-    + annual_insurance
-    + annual_maintenance
-)
-
-net_operating_income = (
-    effective_gross_income
-    - total_operating_expenses
-)
-
-annual_cash_flow = (
-    net_operating_income
-    - annual_mortgage_payments
-)
+annual_cash_flow = noi - annual_mortgage_payments
 
 monthly_cash_flow = annual_cash_flow / 12
 
-# ============================================================
-# INVESTMENT METRICS
-# ============================================================
+cash_invested = down_payment
 
-if purchase_price > 0:
-    cap_rate = (
-        net_operating_income / purchase_price
-    ) * 100
-else:
-    cap_rate = 0
-
-if down_payment > 0:
-    cash_on_cash_return = (
-        annual_cash_flow / down_payment
-    ) * 100
-else:
-    cash_on_cash_return = 0
-
-annual_non_mortgage_costs = (
-    total_operating_expenses
-    + annual_mortgage_payments
+cash_on_cash_return = (
+    annual_cash_flow / cash_invested * 100
+    if cash_invested > 0
+    else 0
 )
 
-if vacancy_rate < 100:
+# Break-even rent
+annual_break_even_rent = (
+    (operating_expenses + annual_mortgage_payments)
+    / (1 - vacancy_rate / 100)
+    if vacancy_rate < 100
+    else 0
+)
 
-    break_even_monthly_rent = (
-        annual_non_mortgage_costs / 12
-    ) / (1 - vacancy_rate / 100)
+break_even_monthly_rent = annual_break_even_rent / 12
 
-else:
-
-    break_even_monthly_rent = 0
 
 # ============================================================
 # DEAL HEALTH
 # ============================================================
 
-if monthly_cash_flow > 200:
-    deal_health = "🟢 Strong"
+if monthly_cash_flow >= 300:
+    health = "🟢 Strong"
+    health_class = "health-good"
 
 elif monthly_cash_flow >= 0:
-    deal_health = "🟡 Marginal"
+    health = "🟡 Marginal"
+    health_class = "health-marginal"
 
 else:
-    deal_health = "🔴 Needs Attention"
+    health = "🔴 Negative"
+    health_class = "health-poor"
+
 
 # ============================================================
 # QUICK DEAL ANALYSIS
 # ============================================================
 
-st.header("Quick Deal Analysis")
+st.markdown(
+    '<div class="section-title">Quick Deal Analysis</div>',
+    unsafe_allow_html=True
+)
 
-st.subheader(f"Deal Health: {deal_health}")
+st.markdown(
+    f'<div class="{health_class}">Deal Health: {health}</div>',
+    unsafe_allow_html=True
+)
+
 
 if monthly_cash_flow > 0:
 
-    st.write(
-        f"This property is estimated to generate approximately "
-        f"${monthly_cash_flow:,.0f} per month in positive cash flow "
-        f"after the estimated operating expenses and mortgage payment."
+    deal_summary = (
+        f"""
+        This property is estimated to generate approximately
+        **${monthly_cash_flow:,.0f} per month in positive cash flow**
+        after estimated operating expenses and mortgage payments.
+        """
     )
 
-elif monthly_cash_flow == 0:
+elif monthly_cash_flow < 0:
 
-    st.write(
-        "This property is approximately cash-flow neutral under "
-        "the assumptions provided."
-    )
-
-else:
-
-    st.write(
-        f"This property is estimated to lose approximately "
-        f"${abs(monthly_cash_flow):,.0f} per month under the "
-        f"current assumptions."
-    )
-
-st.write(
-    f"The property generates a {cap_rate:.2f}% cap rate and a "
-    f"{cash_on_cash_return:.2f}% cash-on-cash return."
-)
-
-st.write(
-    f"The estimated break-even rent is approximately "
-    f"${break_even_monthly_rent:,.0f} per month."
-)
-
-if monthly_rent >= break_even_monthly_rent:
-
-    st.success(
-        "Based on the current assumptions, the expected rent is "
-        "at or above the estimated break-even level."
+    deal_summary = (
+        f"""
+        This property is estimated to require approximately
+        **${abs(monthly_cash_flow):,.0f} per month from the investor**
+        after estimated operating expenses and mortgage payments.
+        """
     )
 
 else:
 
-    st.warning(
-        "Based on the current assumptions, the expected rent is "
-        "below the estimated break-even level."
+    deal_summary = (
+        """
+        This property is estimated to approximately break even each month
+        after the assumptions entered above.
+        """
     )
 
-st.info(
-    "This analysis looks at the property's estimated operating "
-    "performance and financing. A property can still be a good or "
-    "bad investment for reasons beyond cash flow, including "
-    "appreciation, financing, taxes, condition, liquidity and risk."
+
+st.markdown(deal_summary)
+
+
+st.markdown(
+    f"""
+    At the current assumptions, the property generates a
+    **{cap_rate:.2f}% cap rate** and a
+    **{cash_on_cash_return:.2f}% cash-on-cash return**.
+
+    The estimated break-even rent is approximately
+    **${break_even_monthly_rent:,.0f} per month**.
+    """
 )
+
+
+# Plain-English interpretation
+
+if monthly_cash_flow > 0 and cash_on_cash_return >= 5:
+
+    interpretation = """
+    **What this means:** The property is currently producing positive cash
+    flow and the amount of cash invested is generating a reasonable annual
+    return under these assumptions. The investment may have a solid starting
+    position, but the purchase price, financing, property condition and
+    future expenses still matter.
+    """
+
+elif monthly_cash_flow > 0:
+
+    interpretation = """
+    **What this means:** The property is currently paying its estimated
+    operating costs and mortgage and still leaves some cash flow for the
+    investor. However, the return on the cash invested is relatively modest,
+    so the investment may depend more heavily on long-term equity growth,
+    rent growth or appreciation.
+    """
+
+else:
+
+    interpretation = """
+    **What this means:** The property's current rental income does not fully
+    cover the estimated expenses and mortgage payment. An investor would
+    need to contribute additional cash each month unless the assumptions
+    change through a lower purchase price, higher rent, lower expenses,
+    different financing or another strategy.
+    """
+
+st.info(interpretation)
+
 
 # ============================================================
 # KEY METRICS
 # ============================================================
 
-st.header("Key Metrics")
+m1, m2, m3, m4 = st.columns(4)
 
-col1, col2, col3 = st.columns(3)
-
-with col1:
-
+with m1:
     st.metric(
         "Monthly Cash Flow",
-        f"${monthly_cash_flow:,.0f}",
-        help=(
-            "Estimated money left each month after rental income, "
-            "operating expenses and mortgage payments."
-        )
+        f"${monthly_cash_flow:,.0f}"
     )
 
-with col2:
-
+with m2:
     st.metric(
         "Cap Rate",
-        f"{cap_rate:.2f}%",
-        help=(
-            "Measures the property's operating income relative "
-            "to its purchase price, before mortgage financing."
-        )
+        f"{cap_rate:.2f}%"
     )
 
-with col3:
-
+with m3:
     st.metric(
-        "Cash-on-Cash Return",
-        f"{cash_on_cash_return:.2f}%",
-        help=(
-            "Measures annual cash flow compared with the cash "
-            "initially invested in the property."
-        )
+        "Cash-on-Cash",
+        f"{cash_on_cash_return:.2f}%"
     )
 
-# ============================================================
-# BREAK-EVEN ANALYSIS
-# ============================================================
-
-st.header("Break-Even Analysis")
-
-st.write(
-    "Break-even rent is the approximate monthly rent required "
-    "for the property's rental income to cover its estimated "
-    "operating expenses and mortgage payment."
-)
-
-break_even_data = pd.DataFrame(
-    {
-        "Monthly Rent": [
-            break_even_monthly_rent * 0.70,
-            break_even_monthly_rent * 0.80,
-            break_even_monthly_rent * 0.90,
-            break_even_monthly_rent,
-            break_even_monthly_rent * 1.10,
-            break_even_monthly_rent * 1.20,
-            break_even_monthly_rent * 1.30
-        ]
-    }
-)
-
-break_even_data["Monthly Cash Flow"] = (
-    break_even_data["Monthly Rent"]
-    * (1 - vacancy_rate / 100)
-    - total_operating_expenses / 12
-    - monthly_mortgage_payment
-)
-
-break_even_chart = break_even_data.set_index("Monthly Rent")
-
-st.line_chart(
-    break_even_chart,
-    y="Monthly Cash Flow",
-    x_label="Monthly Rent ($)",
-    y_label="Estimated Monthly Cash Flow ($)",
-    width="stretch",
-    height=350
-)
-
-st.caption(
-    "The break-even point occurs where estimated monthly cash flow "
-    "reaches approximately $0."
-)
-
-# ============================================================
-# LONG-TERM WEALTH PROJECTION
-# ============================================================
-
-st.header("Potential Wealth Growth")
-
-st.write(
-    "This projection illustrates how property value, mortgage "
-    "principal reduction and accumulated cash flow could affect "
-    "your estimated equity over time."
-)
-
-st.warning(
-    "Important: These are hypothetical scenarios, not forecasts. "
-    "Actual property values, rents, expenses, interest rates and "
-    "cash flow can be very different."
-)
-
-# ============================================================
-# AMORTIZATION / WEALTH PROJECTION
-# ============================================================
-
-projection_rows = []
-
-current_property_value = purchase_price
-current_mortgage_balance = loan_amount
-current_monthly_rent = monthly_rent
-current_annual_expenses = total_operating_expenses
-cumulative_cash_flow = 0
-
-remaining_payments = number_of_payments
-
-for year in range(1, projection_years + 1):
-
-    beginning_balance = current_mortgage_balance
-
-    annual_interest_paid = 0
-    annual_principal_paid = 0
-    annual_mortgage_paid = 0
-
-    for month in range(12):
-
-        if current_mortgage_balance <= 0:
-            break
-
-        interest_payment = (
-            current_mortgage_balance
-            * monthly_rate
-        )
-
-        principal_payment = (
-            monthly_mortgage_payment
-            - interest_payment
-        )
-
-        if principal_payment > current_mortgage_balance:
-            principal_payment = current_mortgage_balance
-
-        current_mortgage_balance -= principal_payment
-
-        annual_interest_paid += interest_payment
-        annual_principal_paid += principal_payment
-        annual_mortgage_paid += (
-            interest_payment + principal_payment
-        )
-
-    # Grow property value
-    current_property_value *= (
-        1 + appreciation_rate / 100
-    )
-
-    # Grow rent
-    current_monthly_rent *= (
-        1 + rent_growth_rate / 100
-    )
-
-    projected_annual_rent = (
-        current_monthly_rent * 12
-    )
-
-    projected_vacancy_loss = (
-        projected_annual_rent
-        * vacancy_rate
-        / 100
-    )
-
-    projected_income = (
-        projected_annual_rent
-        - projected_vacancy_loss
-    )
-
-    # Grow operating expenses
-    current_annual_expenses *= (
-        1 + expense_growth_rate / 100
-    )
-
-    projected_noi = (
-        projected_income
-        - current_annual_expenses
-    )
-
-    projected_cash_flow = (
-        projected_noi
-        - annual_mortgage_paid
-    )
-
-    cumulative_cash_flow += projected_cash_flow
-
-    estimated_equity = (
-        current_property_value
-        - current_mortgage_balance
-    )
-
-    estimated_total_wealth = (
-        estimated_equity
-        + cumulative_cash_flow
-    )
-
-    projection_rows.append(
-        {
-            "Year": year,
-            "Property Value": current_property_value,
-            "Mortgage Balance": current_mortgage_balance,
-            "Annual Principal Paid": annual_principal_paid,
-            "Annual Interest Paid": annual_interest_paid,
-            "Annual Cash Flow": projected_cash_flow,
-            "Cumulative Cash Flow": cumulative_cash_flow,
-            "Estimated Equity": estimated_equity,
-            "Estimated Total Wealth": estimated_total_wealth
-        }
-    )
-
-projection_df = pd.DataFrame(projection_rows)
-
-# ============================================================
-# WEALTH CHART
-# ============================================================
-
-st.subheader("Property Value, Mortgage & Equity")
-
-wealth_chart_data = projection_df[
-    [
-        "Year",
-        "Property Value",
-        "Mortgage Balance",
-        "Estimated Equity"
-    ]
-].set_index("Year")
-
-st.line_chart(
-    wealth_chart_data,
-    width="stretch",
-    height=400
-)
-
-st.caption(
-    "Equity is estimated as property value minus remaining mortgage "
-    "balance. The projection assumes the selected appreciation rate."
-)
-
-# ============================================================
-# TOTAL WEALTH CHART
-# ============================================================
-
-st.subheader("Estimated Wealth Created Over Time")
-
-total_wealth_chart = projection_df[
-    [
-        "Year",
-        "Estimated Total Wealth"
-    ]
-].set_index("Year")
-
-st.line_chart(
-    total_wealth_chart,
-    width="stretch",
-    height=350
-)
-
-st.caption(
-    "Estimated total wealth combines projected property equity "
-    "and cumulative projected cash flow. It does not include "
-    "taxes, selling costs, transaction costs or other investment returns."
-)
-
-# ============================================================
-# PROJECTION SUMMARY
-# ============================================================
-
-st.subheader("Projection Summary")
-
-final_year = projection_df.iloc[-1]
-
-summary_col1, summary_col2 = st.columns(2)
-
-with summary_col1:
-
+with m4:
     st.metric(
-        f"Estimated Property Value — Year {projection_years}",
-        f"${final_year['Property Value']:,.0f}"
+        "Break-Even Rent",
+        f"${break_even_monthly_rent:,.0f}"
     )
 
-    st.metric(
-        f"Estimated Equity — Year {projection_years}",
-        f"${final_year['Estimated Equity']:,.0f}"
-    )
-
-with summary_col2:
-
-    st.metric(
-        f"Mortgage Balance — Year {projection_years}",
-        f"${final_year['Mortgage Balance']:,.0f}"
-    )
-
-    st.metric(
-        f"Cumulative Cash Flow — Year {projection_years}",
-        f"${final_year['Cumulative Cash Flow']:,.0f}"
-    )
-
-# ============================================================
-# EDUCATION: APPRECIATION VS DEPRECIATION
-# ============================================================
-
-st.header("Understanding Appreciation vs. Depreciation")
-
-with st.expander("What is property appreciation?"):
-
-    st.write(
-        "Appreciation is an increase in the property's market value "
-        "over time. For example, if a property purchased for $500,000 "
-        "later becomes worth $550,000, the property has appreciated "
-        "by $50,000."
-    )
-
-with st.expander("What is depreciation / CCA?"):
-
-    st.write(
-        "Depreciation is different from appreciation. In Canadian "
-        "rental-property taxation, Capital Cost Allowance (CCA) can "
-        "potentially allow an owner to claim a tax deduction for "
-        "certain depreciable property."
-    )
-
-    st.write(
-        "CCA is a tax concept and does not mean that the property's "
-        "market value is falling."
-    )
-
-    st.write(
-        "WTM. does not currently calculate CCA, tax savings or "
-        "CCA recapture. Those should be handled as a separate "
-        "Canadian tax-analysis module."
-    )
-
-with st.expander("Why doesn't WTM. include CCA in the wealth chart yet?"):
-
-    st.write(
-        "Because CCA affects taxes rather than the property's "
-        "market value directly. Combining the two concepts could "
-        "make the chart misleading."
-    )
-
-    st.write(
-        "The current projection therefore focuses on three "
-        "property-level wealth drivers:"
-    )
-
-    st.write(
-        "1. Property appreciation\n\n"
-        "2. Mortgage principal reduction\n\n"
-        "3. Rental cash flow"
-    )
 
 # ============================================================
 # DETAILED ANALYSIS
 # ============================================================
 
-st.header("Detailed Analysis")
+st.markdown(
+    '<div class="section-title">Detailed Analysis</div>',
+    unsafe_allow_html=True
+)
 
-with st.expander("View detailed calculations"):
+d1, d2 = st.columns(2)
+
+with d1:
+
+    st.write(f"**Annual Gross Rent:** ${annual_gross_rent:,.0f}")
+
+    st.write(f"**Vacancy Loss:** ${vacancy_loss:,.0f}")
 
     st.write(
-        f"Annual Gross Rent: ${annual_rent:,.0f}"
+        f"**Effective Gross Income:** ${effective_gross_income:,.0f}"
     )
 
     st.write(
-        f"Vacancy Loss: ${vacancy_loss:,.0f}"
+        f"**Operating Expenses:** ${operating_expenses:,.0f}"
     )
 
     st.write(
-        f"Effective Gross Income: ${effective_gross_income:,.0f}"
+        f"**Net Operating Income:** ${noi:,.0f}"
     )
 
     st.write(
-        f"Operating Expenses: ${total_operating_expenses:,.0f}"
+        f"**Cap Rate:** {cap_rate:.2f}%"
+    )
+
+with d2:
+
+    st.write(
+        f"**Loan Amount:** ${loan_amount:,.0f}"
     )
 
     st.write(
-        f"Net Operating Income: ${net_operating_income:,.0f}"
-    )
-
-    st.write(
-        f"Cap Rate: {cap_rate:.2f}%"
-    )
-
-    st.write(
-        f"Loan Amount: ${loan_amount:,.0f}"
-    )
-
-    st.write(
-        f"Monthly Mortgage Payment: "
+        f"**Monthly Mortgage Payment:** "
         f"${monthly_mortgage_payment:,.0f}"
     )
 
     st.write(
-        f"Annual Mortgage Payments: "
+        f"**Annual Mortgage Payments:** "
         f"${annual_mortgage_payments:,.0f}"
     )
 
     st.write(
-        f"Annual Cash Flow: ${annual_cash_flow:,.0f}"
+        f"**Annual Cash Flow:** "
+        f"${annual_cash_flow:,.0f}"
     )
 
     st.write(
-        f"Monthly Cash Flow: ${monthly_cash_flow:,.0f}"
+        f"**Monthly Cash Flow:** "
+        f"${monthly_cash_flow:,.0f}"
     )
 
     st.write(
-        f"Cash-on-Cash Return: "
+        f"**Cash-on-Cash Return:** "
         f"{cash_on_cash_return:.2f}%"
     )
 
-    st.write(
-        f"Break-even Monthly Rent: "
-        f"${break_even_monthly_rent:,.0f}"
+
+# ============================================================
+# BREAK-EVEN RENT
+# ============================================================
+
+st.markdown(
+    '<div class="section-title">Break-Even Analysis</div>',
+    unsafe_allow_html=True
+)
+
+st.write(
+    f"""
+    The estimated break-even rent is **${break_even_monthly_rent:,.0f}/month**.
+
+    This means the property would need approximately this level of monthly
+    rent, under the assumptions entered, for rental income to cover estimated
+    operating expenses and mortgage payments.
+    """
+)
+
+rent_range = np.linspace(
+    max(0, monthly_rent * 0.5),
+    max(monthly_rent * 1.5, break_even_monthly_rent * 1.25),
+    100
+)
+
+cash_flow_range = []
+
+for rent in rent_range:
+
+    gross = rent * 12
+    vacancy = gross * vacancy_rate / 100
+    effective_income = gross - vacancy
+
+    cash_flow = (
+        effective_income
+        - operating_expenses
+        - annual_mortgage_payments
     )
+
+    cash_flow_range.append(cash_flow / 12)
+
+break_even_df = pd.DataFrame(
+    {
+        "Monthly Rent": rent_range,
+        "Monthly Cash Flow": cash_flow_range
+    }
+)
+
+st.line_chart(
+    break_even_df.set_index("Monthly Rent"),
+    y="Monthly Cash Flow"
+)
+
+st.caption(
+    "The point where the line crosses $0 represents the approximate "
+    "monthly rent required to break even."
+)
+
+
+# ============================================================
+# LONG-TERM WEALTH MODEL
+# ============================================================
+
+st.markdown(
+    '<div class="section-title">Long-Term Wealth & Equity Scenario</div>',
+    unsafe_allow_html=True
+)
+
+st.write(
+    """
+    This section illustrates how the property could build equity over time
+    through three major components:
+
+    **1. Property appreciation** — potential increase in market value.
+
+    **2. Mortgage principal reduction** — part of each mortgage payment
+    reduces the loan balance.
+
+    **3. Rental cash flow** — income remaining after estimated expenses
+    and mortgage payments.
+
+    These are scenario estimates, not predictions.
+    """
+)
+
+
+# ============================================================
+# AMORTIZATION / PROPERTY VALUE MODEL
+# ============================================================
+
+years = list(range(0, amortization_years + 1))
+
+balance = loan_amount
+property_value = purchase_price
+
+rows = []
+
+cumulative_cash_flow = 0
+
+for year in years:
+
+    if year == 0:
+
+        current_balance = loan_amount
+        current_property_value = purchase_price
+        cumulative_cash_flow = 0
+
+    else:
+
+        # Calculate mortgage balance after one additional year
+        for month in range(12):
+
+            if balance <= 0:
+                balance = 0
+                break
+
+            interest_payment = balance * monthly_rate
+
+            principal_payment = (
+                monthly_mortgage_payment - interest_payment
+            )
+
+            principal_payment = max(
+                principal_payment,
+                0
+            )
+
+            balance -= principal_payment
+
+            balance = max(balance, 0)
+
+        current_balance = balance
+
+        current_property_value = (
+            purchase_price
+            * (1 + appreciation_rate / 100) ** year
+        )
+
+        cumulative_cash_flow += annual_cash_flow
+
+    equity = current_property_value - current_balance
+
+    rows.append(
+        {
+            "Year": year,
+            "Property Value": current_property_value,
+            "Mortgage Balance": current_balance,
+            "Property Equity": equity,
+            "Cumulative Cash Flow": cumulative_cash_flow
+        }
+    )
+
+
+wealth_df = pd.DataFrame(rows)
+
+
+# ============================================================
+# WEALTH CHART
+# ============================================================
+
+st.markdown("### Property Value vs. Mortgage Balance")
+
+chart_df = wealth_df.set_index("Year")[
+    [
+        "Property Value",
+        "Mortgage Balance",
+        "Property Equity"
+    ]
+]
+
+st.line_chart(chart_df)
+
+
+st.caption(
+    "The chart illustrates the relationship between estimated property value, "
+    "remaining mortgage balance and accumulated equity."
+)
+
+
+# ============================================================
+# EQUITY SUMMARY
+# ============================================================
+
+final_row = wealth_df.iloc[-1]
+
+final_property_value = final_row["Property Value"]
+final_mortgage_balance = final_row["Mortgage Balance"]
+final_equity = final_row["Property Equity"]
+
+e1, e2, e3 = st.columns(3)
+
+with e1:
+    st.metric(
+        f"Estimated Property Value — Year {amortization_years}",
+        f"${final_property_value:,.0f}"
+    )
+
+with e2:
+    st.metric(
+        f"Estimated Mortgage Balance — Year {amortization_years}",
+        f"${final_mortgage_balance:,.0f}"
+    )
+
+with e3:
+    st.metric(
+        f"Estimated Equity — Year {amortization_years}",
+        f"${final_equity:,.0f}"
+    )
+
+
+# ============================================================
+# DEPRECIATION ILLUSTRATION
+# ============================================================
+
+st.markdown(
+    '<div class="section-title">Illustrative Depreciation Scenario</div>',
+    unsafe_allow_html=True
+)
+
+st.warning(
+    """
+    **Important:** This is an educational visualization only.
+
+    Tax depreciation is not the same thing as a property's market value
+    declining. Actual tax treatment depends on the property, jurisdiction,
+    ownership structure, tax rules and eligible depreciable assets.
+    Consult a qualified tax professional before using depreciation for
+    tax planning.
+    """
+)
+
+
+depreciation_rows = []
+
+depreciable_basis = purchase_price
+
+for year in range(0, amortization_years + 1):
+
+    remaining_value = (
+        depreciable_basis
+        * (1 - depreciation_rate / 100) ** year
+    )
+
+    depreciation_rows.append(
+        {
+            "Year": year,
+            "Illustrative Remaining Depreciable Value":
+                remaining_value
+        }
+    )
+
+
+depreciation_df = pd.DataFrame(
+    depreciation_rows
+).set_index("Year")
+
+
+st.line_chart(
+    depreciation_df
+)
+
+st.caption(
+    "This simplified curve demonstrates how a depreciable basis could decline "
+    "under the selected illustrative rate. It does not calculate a tax claim."
+)
+
+
+# ============================================================
+# RENT GROWTH SCENARIO
+# ============================================================
+
+st.markdown(
+    '<div class="section-title">Potential Rental Income Growth</div>',
+    unsafe_allow_html=True
+)
+
+rent_rows = []
+
+for year in range(0, amortization_years + 1):
+
+    projected_monthly_rent = (
+        monthly_rent
+        * (1 + rent_growth_rate / 100) ** year
+    )
+
+    rent_rows.append(
+        {
+            "Year": year,
+            "Projected Monthly Rent":
+                projected_monthly_rent
+        }
+    )
+
+
+rent_df = pd.DataFrame(rent_rows).set_index("Year")
+
+st.line_chart(
+    rent_df
+)
+
+st.caption(
+    "This is a scenario based on the rent-growth assumption entered above."
+)
+
+
+# ============================================================
+# INVESTOR TAKEAWAY
+# ============================================================
+
+st.markdown(
+    '<div class="section-title">Investor Takeaway</div>',
+    unsafe_allow_html=True
+)
+
+if monthly_cash_flow > 0:
+
+    cashflow_sentence = (
+        f"The property is currently estimated to produce about "
+        f"${monthly_cash_flow:,.0f} per month after the assumptions entered."
+    )
+
+else:
+
+    cashflow_sentence = (
+        f"The property is currently estimated to have a monthly shortfall "
+        f"of approximately ${abs(monthly_cash_flow):,.0f}."
+    )
+
+
+st.markdown(
+    f"""
+    **In simple terms:**
+
+    {cashflow_sentence}
+
+    The property's estimated **{cap_rate:.2f}% cap rate** helps describe
+    the property's operating income relative to its purchase price.
+
+    The **{cash_on_cash_return:.2f}% cash-on-cash return** looks at the
+    annual cash flow relative to the cash invested.
+
+    The estimated break-even rent is **${break_even_monthly_rent:,.0f} per
+    month**, which gives the investor a useful target when comparing the
+    property's current rent with its required income.
+
+    Over the long term, the property may also build wealth through mortgage
+    principal reduction, property appreciation and potential rental growth.
+    However, these outcomes are uncertain and depend on actual market
+    conditions.
+    """
+)
+
+
+# ============================================================
+# EDUCATIONAL DEFINITIONS
+# ============================================================
+
+with st.expander("📘 Simple Definitions — Key Terms"):
+
+    st.markdown(
+        """
+        **Cap Rate**
+
+        A quick way to compare a property's operating income with its price.
+
+        **Formula:** Net Operating Income ÷ Property Value/Purchase Price.
+
+        Higher does not automatically mean better. A higher cap rate may
+        come with higher risk, weaker locations, older properties or other
+        trade-offs.
+
+
+        **Cash-on-Cash Return**
+
+        Measures the annual cash flow generated compared with the cash
+        you personally invested.
+
+        Example: If you invested $100,000 and received $5,000 in annual
+        cash flow, the cash-on-cash return would be 5%.
+
+
+        **Net Operating Income (NOI)**
+
+        The property's income after normal operating expenses but before
+        mortgage payments and income taxes.
+
+
+        **Vacancy Rate**
+
+        An estimate of the percentage of potential rental income that may
+        be lost because the property is empty or between tenants.
+
+        Example: A 5% vacancy rate means the model assumes approximately
+        5% of potential annual rent will not be collected.
+
+
+        **Cash Flow**
+
+        The money left after rental income, operating expenses and mortgage
+        payments.
+
+
+        **Break-Even Rent**
+
+        The approximate monthly rent required for the property's rental
+        income to cover its estimated operating expenses and mortgage.
+
+
+        **Equity**
+
+        The portion of the property that belongs to the owner after
+        subtracting the outstanding mortgage from the property's estimated
+        market value.
+
+
+        **Appreciation**
+
+        An increase in the market value of the property over time.
+
+
+        **Depreciation**
+
+        A reduction in the value assigned to an asset for accounting or
+        tax purposes. It does not necessarily mean the property's market
+        value is falling.
+        """
+    )
+
 
 # ============================================================
 # DISCLAIMER
 # ============================================================
 
-st.divider()
+st.markdown(
+    """
+    <div class="disclaimer">
 
-st.caption(
-    "WTM. — Wealth That Matters"
-)
+    <strong>Disclaimer</strong><br><br>
 
-st.caption(
-    "This analysis is an estimate based on the information entered "
-    "and is provided for educational and informational purposes only. "
-    "It is not financial, investment, tax, legal, mortgage, or real "
-    "estate advice. Actual results may differ materially. Users "
-    "should independently verify all assumptions and consult "
-    "qualified professionals before making financial decisions."
+    WTM. Real Estate Deal Analyzer is provided for educational and
+    informational purposes only. The calculations are estimates based on
+    the assumptions entered by the user and should not be considered
+    financial, investment, tax, accounting, legal, mortgage or real estate
+    advice.
+
+    Actual results may differ materially due to financing terms, taxes,
+    insurance, maintenance, vacancy, rent changes, property condition,
+    market conditions, transaction costs, regulations and other factors.
+
+    The depreciation section is an illustrative scenario and does not
+    calculate or recommend a tax deduction.
+
+    Users should independently verify all assumptions and consult
+    appropriately qualified professionals before making investment or
+    financial decisions.
+
+    <br><br>
+
+    <strong>WTM. — Wealth That Matters</strong>
+
+    </div>
+    """,
+    unsafe_allow_html=True
 )
