@@ -55,6 +55,33 @@ else:
 
 st.header("Basic Analysis")
 
+st.header("Operating Expenses")
+
+annual_property_tax = st.number_input(
+    "Annual Property Tax ($)",
+    min_value=0,
+    value=4000
+)
+
+annual_insurance = st.number_input(
+    "Annual Insurance ($)",
+    min_value=0,
+    value=1500
+)
+
+annual_maintenance = st.number_input(
+    "Annual Maintenance ($)",
+    min_value=0,
+    value=3000
+)
+
+vacancy_rate = st.number_input(
+    "Vacancy Rate (%)",
+    min_value=0.0,
+    max_value=100.0,
+    value=5.0,
+    step=0.5
+)
 st.write(f"Annual Gross Rent: ${annual_rent:,.0f}")
 
 st.write(f"Loan Amount: ${loan_amount:,.0f}")
