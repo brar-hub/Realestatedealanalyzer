@@ -25,106 +25,114 @@ st.markdown(
     <style>
 
     /* ========================================================
-       GENERAL PAGE
+       GLOBAL PAGE
        ======================================================== */
 
     .block-container {
+        width: 100%;
         max-width: 1400px;
-        padding-top: 2rem;
-        padding-left: 4%;
-        padding-right: 4%;
-        padding-bottom: 4rem;
+        padding-left: clamp(12px, 3vw, 50px);
+        padding-right: clamp(12px, 3vw, 50px);
+        padding-top: 1.5rem;
     }
 
 
     /* ========================================================
-       CENTERED WTM HEADER
+       WTM HEADER
        ======================================================== */
 
     .wtm-header {
-        text-align: center;
         width: 100%;
-        margin-bottom: 30px;
+        text-align: center;
+        margin: 5px auto 25px auto;
+        padding: 5px 10px 0 10px;
     }
 
     .wtm-brand {
-        font-size: clamp(44px, 6vw, 72px);
+        font-size: clamp(42px, 5vw, 64px);
         font-weight: 800;
         letter-spacing: -2px;
         line-height: 1;
-        margin-bottom: 8px;
+        margin-bottom: 5px;
     }
 
     .wtm-tagline {
-        font-size: clamp(16px, 2vw, 21px);
+        font-size: clamp(15px, 1.8vw, 20px);
         font-weight: 500;
         margin-bottom: 18px;
     }
 
     .app-title {
-        font-size: clamp(28px, 4vw, 42px);
+        font-size: clamp(28px, 4vw, 46px);
         font-weight: 750;
-        margin-top: 10px;
-        margin-bottom: 10px;
+        line-height: 1.15;
+        margin: 0 auto 10px auto;
     }
 
     .app-description {
-        font-size: clamp(15px, 1.7vw, 18px);
-        max-width: 850px;
-        margin: 0 auto 30px auto;
-        line-height: 1.6;
-        opacity: 0.85;
+        width: min(850px, 95%);
+        margin: 0 auto 25px auto;
+        font-size: clamp(14px, 1.5vw, 18px);
+        line-height: 1.5;
     }
 
 
     /* ========================================================
-       SECTION TITLES
+       SECTION HEADINGS
        ======================================================== */
 
     .section-title {
-        font-size: clamp(21px, 2.5vw, 27px);
+        font-size: clamp(20px, 2.2vw, 27px);
         font-weight: 700;
         margin-top: 28px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
     }
 
 
     /* ========================================================
-       ANALYSIS
+       INPUTS
        ======================================================== */
 
-    .analysis-card {
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid rgba(128,128,128,0.25);
-        margin-bottom: 15px;
+    [data-testid="stHorizontalBlock"] {
+        width: 100%;
     }
 
-    .health-good,
-    .health-marginal,
-    .health-poor {
-        font-size: clamp(22px, 3vw, 28px);
-        font-weight: 700;
-        margin-bottom: 15px;
+    [data-testid="stNumberInput"] {
+        width: 100%;
     }
 
-    .metric-label {
-        font-size: 14px;
-        opacity: 0.75;
+    [data-testid="stNumberInput"] input {
+        width: 100%;
+        box-sizing: border-box;
     }
 
-    .metric-value {
+
+    /* ========================================================
+       METRICS
+       ======================================================== */
+
+    [data-testid="stMetric"] {
+        width: 100%;
+    }
+
+
+    /* ========================================================
+       HEALTH STATUS
+       ======================================================== */
+
+    .health-good {
         font-size: 25px;
         font-weight: 700;
     }
 
+    .health-marginal {
+        font-size: 25px;
+        font-weight: 700;
+    }
 
-    /* ========================================================
-       WATERMARK
-       ======================================================== */
-
-    .watermark {
-        display: none;
+    .health-poor {
+        font-size: 25px;
+        font-weight: 700;
     }
 
 
@@ -134,7 +142,7 @@ st.markdown(
 
     .disclaimer {
         font-size: 12px;
-        opacity: 0.7;
+        opacity: 0.72;
         margin-top: 35px;
         padding-top: 18px;
         border-top: 1px solid rgba(128,128,128,0.25);
@@ -143,41 +151,38 @@ st.markdown(
 
 
     /* ========================================================
-       RESPONSIVE DESIGN
+       PRINT WATERMARK
        ======================================================== */
 
-    @media screen and (max-width: 900px) {
+    .watermark {
+        display: none;
+    }
+
+
+    /* ========================================================
+       MOBILE
+       ======================================================== */
+
+    @media (max-width: 768px) {
 
         .block-container {
-            padding-left: 3%;
-            padding-right: 3%;
-            padding-top: 1.25rem;
+            padding-left: 12px;
+            padding-right: 12px;
+            padding-top: 1rem;
+        }
+
+        .wtm-header {
+            padding-top: 5px;
+        }
+
+        .app-description {
+            width: 100%;
         }
 
         .section-title {
             margin-top: 22px;
         }
-    }
 
-
-    @media screen and (max-width: 600px) {
-
-        .block-container {
-            padding-left: 18px;
-            padding-right: 18px;
-        }
-
-        .wtm-header {
-            margin-bottom: 20px;
-        }
-
-        .app-description {
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            margin-top: 20px;
-        }
     }
 
 
@@ -197,17 +202,13 @@ st.markdown(
             print-color-adjust: exact;
         }
 
-        .stApp {
-            position: relative;
-        }
-
         .watermark {
             display: block !important;
             position: fixed;
             top: 45%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-25deg);
-            font-size: 100px;
+            font-size: 110px;
             font-weight: 800;
             opacity: 0.07;
             z-index: 9999;
@@ -217,7 +218,8 @@ st.markdown(
         button,
         [data-testid="stSidebar"],
         [data-testid="stHeader"],
-        [data-testid="stToolbar"] {
+        [data-testid="stToolbar"],
+        [data-testid="stDecoration"] {
             display: none !important;
         }
 
@@ -225,10 +227,6 @@ st.markdown(
             display: none !important;
         }
 
-        .block-container {
-            max-width: none;
-            padding: 0;
-        }
     }
 
     </style>
@@ -251,53 +249,47 @@ st.markdown(
 # HEADER
 # ============================================================
 
-header_left, header_middle, header_right = st.columns([1, 2, 1])
+st.markdown(
+    """
+    <div class="wtm-header">
 
-with header_middle:
-
-    st.markdown(
-        """
-        <div class="wtm-header">
-
-            <div class="wtm-brand">
-                WTM.
-            </div>
-
-            <div class="wtm-tagline">
-                Wealth That Matters
-            </div>
-
-            <div class="app-title">
-                Real Estate Deal Analyzer
-            </div>
-
-            <div class="app-description">
-                A free tool to analyze real estate investment opportunities
-                and understand how a property could build wealth over time.
-            </div>
-
+        <div class="wtm-brand">
+            WTM.
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="wtm-tagline">
+            Wealth That Matters
+        </div>
+
+        <div class="app-title">
+            Real Estate Deal Analyzer
+        </div>
+
+        <div class="app-description">
+            A free tool to analyze real estate investment opportunities
+            and understand how a property could build wealth over time.
+        </div>
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 
 # ============================================================
 # PRINT BUTTON
 # ============================================================
 
-with header_right:
+print_col1, print_col2, print_col3 = st.columns([8, 1.5, 0.5])
 
-    st.markdown(
-        '<div class="no-print" style="margin-top:10px;">',
-        unsafe_allow_html=True
-    )
+with print_col2:
 
     if st.button(
         "🖨️ Print",
         use_container_width=True,
-        help="Print the analysis or save it as a PDF using your browser's print dialog."
+        help="Print the analysis or save it as a PDF."
     ):
+
         st.markdown(
             """
             <script>
@@ -306,11 +298,6 @@ with header_right:
             """,
             unsafe_allow_html=True
         )
-
-    st.markdown(
-        '</div>',
-        unsafe_allow_html=True
-    )
 
 
 # ============================================================
@@ -322,8 +309,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
-# Responsive Streamlit columns
 col1, col2 = st.columns(2)
 
 
@@ -378,7 +363,9 @@ with col2:
         format="%.2f",
         help="""
         The annual interest rate charged on the mortgage.
-        This affects your monthly mortgage payment and investment cash flow.
+
+        This affects the monthly mortgage payment and the property's
+        estimated cash flow.
         """
     )
 
@@ -390,8 +377,9 @@ with col2:
         step=1,
         help="""
         The number of years used to calculate the mortgage payment.
+
         A longer amortization generally lowers the monthly payment but
-        increases total interest paid over the life of the loan.
+        increases the total interest paid over the life of the loan.
         """
     )
 
@@ -404,7 +392,6 @@ st.markdown(
     '<div class="section-title">Operating Expenses</div>',
     unsafe_allow_html=True
 )
-
 
 col1, col2 = st.columns(2)
 
@@ -469,20 +456,20 @@ with col2:
         5% of annual potential rent will not be collected.
 
         Basic calculation:
+
         Vacancy Loss = Annual Gross Rent × Vacancy Rate
         """
     )
 
 
 # ============================================================
-# LONG-TERM ASSUMPTIONS
+# LONG-TERM WEALTH ASSUMPTIONS
 # ============================================================
 
 st.markdown(
     '<div class="section-title">Long-Term Wealth Assumptions</div>',
     unsafe_allow_html=True
 )
-
 
 col1, col2, col3 = st.columns(3)
 
@@ -516,8 +503,8 @@ with col2:
         help="""
         Assumed annual growth in rental income.
 
-        This is a scenario assumption and actual rent growth depends
-        on market conditions and applicable regulations.
+        Actual rent growth depends on market conditions,
+        tenant demand and applicable regulations.
         """
     )
 
@@ -535,8 +522,9 @@ with col3:
         An illustrative annual depreciation rate used only to visualize
         how a property's depreciable value could decline over time.
 
-        Actual tax depreciation rules are jurisdiction-specific and may
-        differ substantially from this simplified illustration.
+        This does NOT calculate an actual tax deduction.
+
+        Actual tax depreciation rules are jurisdiction-specific.
         """
     )
 
@@ -570,9 +558,13 @@ loan_amount = max(
     0
 )
 
-monthly_rate = interest_rate / 100 / 12
+monthly_rate = (
+    interest_rate / 100 / 12
+)
 
-number_of_payments = amortization_years * 12
+number_of_payments = (
+    amortization_years * 12
+)
 
 
 if loan_amount <= 0:
@@ -624,15 +616,19 @@ cash_on_cash_return = (
 # BREAK-EVEN RENT
 # ============================================================
 
-annual_break_even_rent = (
-    (
+if vacancy_rate < 100:
+
+    annual_break_even_rent = (
         operating_expenses
         + annual_mortgage_payments
+    ) / (
+        1 - vacancy_rate / 100
     )
-    / (1 - vacancy_rate / 100)
-    if vacancy_rate < 100
-    else 0
-)
+
+else:
+
+    annual_break_even_rent = 0
+
 
 break_even_monthly_rent = (
     annual_break_even_rent / 12
@@ -714,17 +710,18 @@ st.markdown(
 
 
 # ============================================================
-# PLAIN ENGLISH INTERPRETATION
+# PLAIN-ENGLISH INTERPRETATION
 # ============================================================
 
 if monthly_cash_flow > 0 and cash_on_cash_return >= 5:
 
     interpretation = """
-    **What this means:** The property is currently producing positive cash
-    flow and the amount of cash invested is generating a reasonable annual
-    return under these assumptions. The investment may have a solid starting
-    position, but the purchase price, financing, property condition and
-    future expenses still matter.
+    **What this means:** The property is currently producing positive
+    cash flow and the amount of cash invested is generating a reasonable
+    annual return under these assumptions.
+
+    The investment may have a solid starting position, but the purchase
+    price, financing, property condition and future expenses still matter.
     """
 
 elif monthly_cash_flow > 0:
@@ -732,19 +729,22 @@ elif monthly_cash_flow > 0:
     interpretation = """
     **What this means:** The property is currently paying its estimated
     operating costs and mortgage and still leaves some cash flow for the
-    investor. However, the return on the cash invested is relatively modest,
-    so the investment may depend more heavily on long-term equity growth,
+    investor.
+
+    However, the return on the cash invested is relatively modest, so the
+    investment may depend more heavily on long-term equity growth,
     rent growth or appreciation.
     """
 
 else:
 
     interpretation = """
-    **What this means:** The property's current rental income does not fully
-    cover the estimated expenses and mortgage payment. An investor would
-    need to contribute additional cash each month unless the assumptions
-    change through a lower purchase price, higher rent, lower expenses,
-    different financing or another strategy.
+    **What this means:** The property's current rental income does not
+    fully cover the estimated expenses and mortgage payment.
+
+    An investor would need to contribute additional cash each month unless
+    the assumptions change through a lower purchase price, higher rent,
+    lower expenses, different financing or another strategy.
     """
 
 
@@ -799,7 +799,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 d1, d2 = st.columns(2)
 
 
@@ -824,7 +823,8 @@ with d1:
     )
 
     st.write(
-        f"**Net Operating Income:** ${noi:,.0f}"
+        f"**Net Operating Income:** "
+        f"${noi:,.0f}"
     )
 
     st.write(
@@ -873,15 +873,14 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 st.write(
     f"""
     The estimated break-even rent is
     **${break_even_monthly_rent:,.0f}/month**.
 
     This means the property would need approximately this level of monthly
-    rent, under the assumptions entered, for rental income to cover estimated
-    operating expenses and mortgage payments.
+    rent, under the assumptions entered, for rental income to cover
+    estimated operating expenses and mortgage payments.
     """
 )
 
@@ -951,7 +950,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 st.write(
     """
     This section illustrates how the property could build equity over time
@@ -981,7 +979,6 @@ years = list(
     )
 )
 
-
 balance = loan_amount
 
 rows = []
@@ -1006,7 +1003,6 @@ for year in years:
             if balance <= 0:
 
                 balance = 0
-
                 break
 
             interest_payment = (
@@ -1034,9 +1030,7 @@ for year in years:
 
         current_property_value = (
             purchase_price
-            * (
-                1 + appreciation_rate / 100
-            ) ** year
+            * (1 + appreciation_rate / 100) ** year
         )
 
         cumulative_cash_flow += (
@@ -1063,7 +1057,7 @@ wealth_df = pd.DataFrame(rows)
 
 
 # ============================================================
-# WEALTH CHART
+# PROPERTY VALUE VS MORTGAGE
 # ============================================================
 
 st.markdown(
@@ -1071,9 +1065,7 @@ st.markdown(
 )
 
 
-chart_df = wealth_df.set_index(
-    "Year"
-)[
+chart_df = wealth_df.set_index("Year")[
     [
         "Property Value",
         "Mortgage Balance",
@@ -1086,8 +1078,8 @@ st.line_chart(chart_df)
 
 
 st.caption(
-    "The chart illustrates the relationship between estimated property value, "
-    "remaining mortgage balance and accumulated equity."
+    "The chart illustrates the relationship between estimated property "
+    "value, remaining mortgage balance and accumulated equity."
 )
 
 
@@ -1096,7 +1088,6 @@ st.caption(
 # ============================================================
 
 final_row = wealth_df.iloc[-1]
-
 
 final_property_value = (
     final_row["Property Value"]
@@ -1117,8 +1108,7 @@ e1, e2, e3 = st.columns(3)
 with e1:
 
     st.metric(
-        f"Estimated Property Value — "
-        f"Year {amortization_years}",
+        f"Estimated Property Value — Year {amortization_years}",
         f"${final_property_value:,.0f}"
     )
 
@@ -1126,8 +1116,7 @@ with e1:
 with e2:
 
     st.metric(
-        f"Estimated Mortgage Balance — "
-        f"Year {amortization_years}",
+        f"Estimated Mortgage Balance — Year {amortization_years}",
         f"${final_mortgage_balance:,.0f}"
     )
 
@@ -1135,8 +1124,7 @@ with e2:
 with e3:
 
     st.metric(
-        f"Estimated Equity — "
-        f"Year {amortization_years}",
+        f"Estimated Equity — Year {amortization_years}",
         f"${final_equity:,.0f}"
     )
 
@@ -1156,8 +1144,10 @@ st.warning(
     **Important:** This is an educational visualization only.
 
     Tax depreciation is not the same thing as a property's market value
-    declining. Actual tax treatment depends on the property, jurisdiction,
-    ownership structure, tax rules and eligible depreciable assets.
+    declining.
+
+    Actual tax treatment depends on the property, jurisdiction, ownership
+    structure, tax rules and eligible depreciable assets.
 
     Consult a qualified tax professional before using depreciation for
     tax planning.
@@ -1166,7 +1156,6 @@ st.warning(
 
 
 depreciation_rows = []
-
 
 depreciable_basis = purchase_price
 
@@ -1178,9 +1167,7 @@ for year in range(
 
     remaining_value = (
         depreciable_basis
-        * (
-            1 - depreciation_rate / 100
-        ) ** year
+        * (1 - depreciation_rate / 100) ** year
     )
 
     depreciation_rows.append(
@@ -1194,9 +1181,7 @@ for year in range(
 
 depreciation_df = pd.DataFrame(
     depreciation_rows
-).set_index(
-    "Year"
-)
+).set_index("Year")
 
 
 st.line_chart(
@@ -1205,8 +1190,9 @@ st.line_chart(
 
 
 st.caption(
-    "This simplified curve demonstrates how a depreciable basis could decline "
-    "under the selected illustrative rate. It does not calculate a tax claim."
+    "This simplified curve demonstrates how a depreciable basis could "
+    "decline under the selected illustrative rate. It does not calculate "
+    "a tax claim."
 )
 
 
@@ -1230,9 +1216,7 @@ for year in range(
 
     projected_monthly_rent = (
         monthly_rent
-        * (
-            1 + rent_growth_rate / 100
-        ) ** year
+        * (1 + rent_growth_rate / 100) ** year
     )
 
     rent_rows.append(
@@ -1246,9 +1230,7 @@ for year in range(
 
 rent_df = pd.DataFrame(
     rent_rows
-).set_index(
-    "Year"
-)
+).set_index("Year")
 
 
 st.line_chart(
@@ -1305,6 +1287,7 @@ st.markdown(
 
     Over the long term, the property may also build wealth through mortgage
     principal reduction, property appreciation and potential rental growth.
+
     However, these outcomes are uncertain and depend on actual market
     conditions.
     """
@@ -1312,79 +1295,83 @@ st.markdown(
 
 
 # ============================================================
-# EDUCATIONAL DEFINITIONS
+# SIMPLE DEFINITIONS
 # ============================================================
 
-with st.expander(
-    "📘 Simple Definitions — Key Terms"
-):
+with st.expander("📘 Simple Definitions — Key Terms"):
 
     st.markdown(
         """
-        **Cap Rate**
+        ### Cap Rate
 
-        A quick way to compare a property's operating income with its price.
+        A quick way to compare a property's operating income with its
+        purchase price.
 
         **Formula:** Net Operating Income ÷ Property Value/Purchase Price.
 
-        Higher does not automatically mean better. A higher cap rate may
-        come with higher risk, weaker locations, older properties or other
-        trade-offs.
+        A higher cap rate does not automatically mean a better investment.
+        It may reflect higher risk, weaker locations, older properties or
+        other trade-offs.
 
 
-        **Cash-on-Cash Return**
+        ### Cash-on-Cash Return
 
         Measures the annual cash flow generated compared with the cash
         you personally invested.
 
-        Example: If you invested $100,000 and received $5,000 in annual
+        **Example:** If you invested $100,000 and received $5,000 in annual
         cash flow, the cash-on-cash return would be 5%.
 
 
-        **Net Operating Income (NOI)**
+        ### Net Operating Income (NOI)
 
         The property's income after normal operating expenses but before
         mortgage payments and income taxes.
 
 
-        **Vacancy Rate**
+        ### Vacancy Rate
 
         An estimate of the percentage of potential rental income that may
         be lost because the property is empty or between tenants.
 
-        Example: A 5% vacancy rate means the model assumes approximately
+        **Example:** A 5% vacancy rate means the model assumes approximately
         5% of potential annual rent will not be collected.
 
+        **Basic calculation:**
 
-        **Cash Flow**
+        Vacancy Loss = Annual Gross Rent × Vacancy Rate
+
+
+        ### Cash Flow
 
         The money left after rental income, operating expenses and mortgage
         payments.
 
 
-        **Break-Even Rent**
+        ### Break-Even Rent
 
         The approximate monthly rent required for the property's rental
         income to cover its estimated operating expenses and mortgage.
 
 
-        **Equity**
+        ### Equity
 
         The portion of the property that belongs to the owner after
         subtracting the outstanding mortgage from the property's estimated
         market value.
 
 
-        **Appreciation**
+        ### Appreciation
 
         An increase in the market value of the property over time.
 
 
-        **Depreciation**
+        ### Depreciation
 
         A reduction in the value assigned to an asset for accounting or
-        tax purposes. It does not necessarily mean the property's market
-        value is falling.
+        tax purposes.
+
+        It does not necessarily mean the property's market value is falling.
         """
     )
 
