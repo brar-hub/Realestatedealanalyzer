@@ -26,7 +26,7 @@ st.markdown(
     <style>
 
     .wtm-brand {
-        font-size: 42px;
+        font-size: 60px;
         font-weight: 800;
         letter-spacing: -1px;
         margin-bottom: -8px;
