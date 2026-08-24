@@ -38,6 +38,25 @@ amortization_years = st.number_input(
 )
 annual_rent = monthly_rent * 12
 
+loan_amount = purchase_price - down_payment
+
+monthly_rate = interest_rate / 100 / 12
+
+number_of_payments = amortization_years * 12
+
+if monthly_rate > 0:
+    monthly_mortgage_payment = loan_amount * (
+        monthly_rate * (1 + monthly_rate) ** number_of_payments
+    ) / (
+        (1 + monthly_rate) ** number_of_payments - 1
+    )
+else:
+    monthly_mortgage_payment = loan_amount / number_of_payments
+
 st.header("Basic Analysis")
 
 st.write(f"Annual Gross Rent: ${annual_rent:,.0f}")
+
+st.write(f"Loan Amount: ${loan_amount:,.0f}")
+st.write(f"Monthly Mortgage Payment: ${monthly_mortgage_payment:,.0f}")
+st.write(f"Annual Mortgage Payments: ${monthly_mortgage_payment * 12:,.0f}")
