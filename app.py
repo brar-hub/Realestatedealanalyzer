@@ -167,24 +167,6 @@ with header_left:
         unsafe_allow_html=True
     )
 
-with header_right:
-    st.markdown('<div class="no-print">', unsafe_allow_html=True)
-
-    if st.button(
-        "🖨️ Print",
-        use_container_width=True,
-        help="Print the analysis or save it as a PDF using your browser's print dialog."
-    ):
-        st.markdown(
-            """
-            <script>
-                window.print();
-            </script>
-            """,
-            unsafe_allow_html=True
-        )
-
-    st.markdown('</div>', unsafe_allow_html=True)
 
 
 st.title("Real Estate Deal Analyzer")
